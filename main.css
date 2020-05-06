@@ -1,0 +1,69 @@
+.contentContainer>*{
+    position: absolute;
+}
+.contentContainer{
+    position: absolute;
+}
+.shotButton{
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+}
+canvas{
+    position: absolute;
+}
+button{
+    touch-action: none;
+}
+.transformMenu{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backdrop-filter: blur(5px);
+    z-index: 1;
+}
+.transformMenu>*{
+    position: absolute;
+    width: 20%;
+    height: 20%;
+}
+.transformMenu *{
+    user-select: none;
+}
+.transformMenu>i{
+    left: 40%;
+    top: 40%;
+    font-size: 80px;
+}
+svg{
+    border: 1px solid rgba(41, 41, 41, 0.11);
+}
+#content{
+    width: 100%;
+    flex-grow: 1;
+    overflow: auto;
+    position: relative;
+}
+body{
+    display: flex;
+    flex-flow: column;
+    margin: 0;
+}
+header{
+    text-align: center;
+    margin:10px;
+    z-index: 10;
+    background-color: whitesmoke;
+    touch-action: none;
+}
+header *{
+    touch-action: none;
+    user-select: none;
+}
+select{
+    touch-action: initial;
+    user-select: initial;
+}
+canvas{
+    transform-origin:left top;
+}
