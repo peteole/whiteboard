@@ -11,6 +11,7 @@ class SvgDrawing extends DocumentNode {
         /**@type {Point[]} */
         this.startedLine = [];
         this.activateDrawing();
+        this.updateSizes();
     }
     /**
      * 

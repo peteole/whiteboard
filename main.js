@@ -14,18 +14,26 @@ var peer;
 var connection;
 /**@type {HTMLHtmlElement} */
 var header;
+var outbox = [];
+function broadcast(message) {
+    if (connection) {
+        connection.send(message);
+    } else {
+        outbox.push(message);
+    }
+}
 /**
  * 
  * @param {Operation} operation 
  */
 function addOperation(operation) {
     operationLog.push(operation);
-    connection.send(operation.toString());
+    broadcast(operation.toString());
 }
 function removeOperation(operation) {
     operationLog.length--;
     undoneOperations.push(operation);
-    connection.send("undo");
+    broadcast("undo");
 }
 function mainLoaded() {
     header = document.querySelector("header");
@@ -51,7 +59,7 @@ function mainLoaded() {
             operationLog.length--;
             undoneOperations.push(last);
             if (ev)
-                connection.send("undo");
+                broadcast("undo");
             lastLogSize = operationLog.length;
         }
     }
@@ -63,13 +71,14 @@ function mainLoaded() {
             lastLogSize++;
             undoneOperations.length--;
             if (ev)
-                connection.send("redo");
+                broadcast("redo");
         }
     }
     peer = new Peer();
     peer.on('open', (id) => {
         console.log('My peer ID is: ' + id);
         const idCopyButton = document.createElement("button");
+        idCopyButton.id = "idCopyButton";
         idCopyButton.innerHTML = "copy id";
         idCopyButton.onclick = ev => copyToClipboard(id);
         header.appendChild(idCopyButton);
@@ -108,6 +117,15 @@ const copyToClipboard = str => {
 function addConnection(conn) {
     connection = conn;
     connection.on("open", () => {
+        console.log("connection started");
+        outbox.forEach(msg => connection.send(msg));
+        outbox = [];
+        const idCopyButton = document.getElementById("idCopyButton");
+        idCopyButton.innerHTML = "disconnect";
+        idCopyButton.onclick = ev => {
+            idCopyButton.innerHTML = "copy id";
+            idCopyButton.onclick = ev => copyToClipboard(peer.id);
+        }
         connection.on("data", data => {
             console.log(data);
             switch (data) {

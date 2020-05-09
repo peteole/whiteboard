@@ -26,6 +26,7 @@ class AddElement extends Operation {
         idToElement.set(this.subject.id,this.subject);
         this.options.subjectId=this.subject.id;
         window.content.appendChild(this.subject.getHTML());
+        this.subject.updateSizes();
         this.options.executed = true;
     }
     undo(){

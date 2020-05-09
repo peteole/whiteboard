@@ -31,7 +31,11 @@ class DocumentNode {
         this.contentContainer.style.width = this.size.x + "px";
         this.contentContainer.style.height = this.size.y + "px";
         this.touchController = new SwipeElementItem(this.contentContainer);
-        this.touchController.onMove = sw => { };
+        this.touchController.sleep = true;
+        this.touchController.onMove = sw => {
+            this.position = { x: sw.currentX, y: sw.currentY };
+            this.draw();
+        }
         this.touchController.onMoveEnd = (sw, mp) => {
             if (!this.isMoving)
                 return;
@@ -45,14 +49,12 @@ class DocumentNode {
         this.rawContent = null;
         this.enableMoving = ev => {
             ev.preventDefault();
+            this.updateSizes();
             this.isMoving = true;
             content.style.touchAction = "none";
+            this.touchController.sleep = false;
             //document.body.style.touchAction = "none";
             this.transformMenu.style.display = "initial";
-            this.touchController.onMove = sw => {
-                this.position = { x: sw.currentX, y: sw.currentY };
-                this.draw();
-            }
             this.contentContainer.oncontextmenu = this.disableMoving;
         }
         this.disableMoving = ev => {
@@ -60,13 +62,12 @@ class DocumentNode {
             this.isMoving = false;
             content.style.touchAction = "initial";
             this.transformMenu.style.display = "none";
-            this.touchController.onMove = sw => { }
+            this.touchController.sleep = true;
             this.contentContainer.oncontextmenu = this.enableMoving;
         }
         this.contentContainer.oncontextmenu = this.enableMoving;
         this.contentContainer.appendChild(this.getTransformMenu());
         this.isMoving = false;
-
         /*this.rawContent.onresize = ev => {
             this.transformMenu.style.height = this.rawContent.clientHeight + "px";
             this.transformMenu.style.width = this.rawContent.clientWidth + "px";
@@ -76,13 +77,29 @@ class DocumentNode {
         return this.contentContainer;
     }
     setRawContent(newContent) {
-        if (this.rawContent && this.rawContent.parentElement) {
-            this.contentContainer.replaceChild(this.rawContent, newContent);
+        if (this.rawContent && this.rawContent.parentNode == this.contentContainer) {
+            this.contentContainer.replaceChild(newContent, this.rawContent);
             this.rawContent = newContent;
         } else {
+            while (this.contentContainer.firstChild) {
+                this.contentContainer.removeChild(this.contentContainer.firstChild);
+            }
+            this.contentContainer.appendChild(this.transformMenu);
             this.contentContainer.appendChild(newContent);
             this.rawContent = newContent;
         }
+        const rect = this.getBoundingRect();
+        this.resize(rect.w, rect.h);
+    }
+    onresize() { }
+    resize(width = 0, height = 0) {
+        this.transformMenu.style.width = width + "px";
+        this.transformMenu.style.height = height + "px";
+        this.onresize();
+    }
+    updateSizes() {
+        const rect = this.getBoundingRect();
+        this.resize(rect.w, rect.h);
     }
     draw() {
         this.contentContainer.style.left = this.position.x + "px";
@@ -102,6 +119,23 @@ class DocumentNode {
     }
     show() {
         this.contentContainer.style.display = "initial";
+    }
+    getBoundingRect() {
+        const top = this.contentContainer.clientTop;
+        const left = this.contentContainer.clientLeft;
+        var w = this.contentContainer.clientWidth;
+        var h = this.contentContainer.clientHeight;
+        this.contentContainer.querySelectorAll("*").forEach(el => {
+            const rect = el.getBoundingClientRect();
+            w = Math.max(w, rect.left + rect.width - left);
+            h = Math.max(h, rect.top + rect.height - top);
+        });
+        return {
+            top: top,
+            left: left,
+            w: w,
+            h: h
+        };
     }
 }
 DocumentNode.lastID = 0;

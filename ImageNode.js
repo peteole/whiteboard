@@ -102,10 +102,11 @@ class ImageNode extends DocumentNode {
                             this.content.removeChild(this.content.firstChild);
                         this.canvas.style.transform = "scale(" + factor + ")";
                         this.content.appendChild(this.canvas);
-                        const newOp = new DrawImage({ executed: true, subjectId: this.id }, this.canvas);
-                        newOp.finished.then(() => {
-                            addOperation(newOp);
-                        })
+                        addOperation(new DrawImage({ executed: true, subjectId: this.id }, this.canvas));
+                        const rect = this.getBoundingRect();
+                        this.contentContainer.style.height = rect.h + "px";
+                        this.contentContainer.style.width = rect.w + "px";
+                        this.updateSizes();
 
                         /*const img = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         const xFactor=this.video.clientWidth/photoMat.cols;

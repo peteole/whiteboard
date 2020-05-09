@@ -9,14 +9,7 @@ class DrawImage extends Operation {
         /**@type {ImageNode} */
         this.subject;
         this.image = image;
-        this.finished = new Promise((res, rej) => {
-            image.toBlob(blob => {
-                blob.text().then((text) => {
-                    this.imageBlob = text;
-                    res();
-                });
-            });
-        });
+        this.imageUrl = image.toDataURL("image/png");
     }
     do() {
 
@@ -29,7 +22,7 @@ class DrawImage extends Operation {
         return JSON.stringify({
             type: "DrawImage",
             options: this.options,
-            value: this.imageBlob
+            value: this.imageUrl
         });
     }
     /**
@@ -38,15 +31,15 @@ class DrawImage extends Operation {
      * @param {OperationOptions} options 
      */
     static fromString(value, options) {
-        const imageBlob = new Blob([value]);
+        //const imageBlob = value;//new Blob([value], { type: "image/png" });
         const image = new Image();
         const canvas = document.createElement("canvas");
         image.onload = ev => {
-            canvas.getContext("2d").drawImage(image);
-            document.body.removeChild(image);
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.getContext("2d").drawImage(image, 0, 0);
         }
-        image.src = URL.createObjectURL(imageBlob);
-        document.body.appendChild(image);
+        image.src = value;//URL.createObjectURL(imageBlob);
         return new DrawImage(options, canvas);
     }
 }
